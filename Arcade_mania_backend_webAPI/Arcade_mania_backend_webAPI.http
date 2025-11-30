@@ -1,0 +1,6 @@
+@Arcade_mania_backend_webAPI_HostAddress = http://localhost:5118
+
+GET {{Arcade_mania_backend_webAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
