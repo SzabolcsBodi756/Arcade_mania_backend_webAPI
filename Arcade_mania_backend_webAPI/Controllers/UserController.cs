@@ -3,192 +3,307 @@ using Arcade_mania_backend_webAPI.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Arcade_mania_backend_webAPI.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class UsersController : ControllerBase
+namespace Arcade_mania_backend_webAPI.Controllers
 {
-
-    private readonly GameScoresDbContext _context;
-
-
-    public UsersController(GameScoresDbContext context)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UsersController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly GameScoresDbContext _context;
 
-
-    // GET: api/Users  -> összes user (jelszó nélkül)
-    [HttpGet]
-    public async Task<ActionResult<UserGetDto>> GetUsers()
-    {
-        var users = await _context.Users
-            .Select(u => new UserGetDto
-            {
-                Id = u.Id,
-                Name = u.Name,
-                FighterHighScore = u.FighterHighScore,
-                MemoryHighScore = u.MemoryHighScore,
-                SnakeHighScore = u.SnakeHighScore
-            })
-            .ToListAsync();
-
-        return Ok(users);
-    }
-
-
-    // GET: api/Users/debug  -> összes user, JELSZÓVAL (csak teszt!)
-    [HttpGet("debug")]
-    public async Task<ActionResult<UserGetDto_allData>> GetUsersWithPassword()
-    {
-        var users = await _context.Users
-            .Select(u => new UserGetDto_allData
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Password = u.Password,
-                FighterHighScore = u.FighterHighScore,
-                MemoryHighScore = u.MemoryHighScore,
-                SnakeHighScore = u.SnakeHighScore
-            })
-            .ToListAsync();
-
-        return Ok(users);
-    }
-
-
-    // GET: api/Users/5  -> egy user ID alapján (jelszó nélkül)
-    [HttpGet("{id}")]
-    public async Task<ActionResult<UserGetByIdDto>> GetUser(uint id)
-    {
-        var user = await _context.Users.FindAsync(id);
-
-        if (user == null)
-            return NotFound();
-
-        var dto = new UserGetByIdDto
+        public UsersController(GameScoresDbContext context)
         {
-            Id = user.Id,
-            Name = user.Name,
-            FighterHighScore = user.FighterHighScore,
-            MemoryHighScore = user.MemoryHighScore,
-            SnakeHighScore = user.SnakeHighScore
-        };
-
-        return Ok(dto);
-    }
-
-
-    [HttpGet("{id}/debug")]
-    public async Task<ActionResult<UserGetByIdDto_allData>> GetUserWithPassword(uint id)
-    {
-        var user = await _context.Users.FindAsync(id);
-
-        if (user == null)
-            return NotFound();
-
-        var dto = new UserGetByIdDto_allData
-        {
-            Id = user.Id,
-            Name = user.Name,
-            Password = user.Password,
-            FighterHighScore = user.FighterHighScore,
-            MemoryHighScore = user.MemoryHighScore,
-            SnakeHighScore = user.SnakeHighScore
-        };
-
-        return Ok(dto);
-    }
-
-
-    // POST: api/Users  -> új user felvitele, NÉV EGYEDISÉG ELLENŐRZÉSSEL
-    [HttpPost]
-    public async Task<ActionResult<UserGetByIdDto>> CreateUser(UserCreateDto dto)
-    {
-        // Név egyediség ellenőrzése
-        var nameExists = await _context.Users
-            .AnyAsync(u => u.Name == dto.Name);
-
-        if (nameExists)
-        {
-            return Conflict(new
-            {
-                message = "Már létezik ilyen nevű felhasználó."
-            });
+            _context = context;
         }
 
-        var user = new User
+        // GET: api/Users  -> összes user (jelszó nélkül)
+        [HttpGet]
+        public async Task<ActionResult> GetUsers()
         {
-            Name = dto.Name,
-            Password = dto.Password, // később hash
-            FighterHighScore = dto.FighterHighScore,
-            MemoryHighScore = dto.MemoryHighScore,
-            SnakeHighScore = dto.SnakeHighScore
-        };
+            try
+            {
+                var users = await _context.Users
+                    .Select(u => new UserGetDto
+                    {
+                        Id = u.Id,
+                        Name = u.Name,
+                        FighterHighScore = u.FighterHighScore,
+                        MemoryHighScore = u.MemoryHighScore,
+                        SnakeHighScore = u.SnakeHighScore
+                    })
+                    .ToListAsync();
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+                return StatusCode(200, new { message = "Sikeres lekérdezés", result = users });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
 
-        var resultDto = new UserGetByIdDto
+        // GET: api/Users/debug  -> összes user, JELSZÓVAL (csak teszt!)
+        [HttpGet("debug")]
+        public async Task<ActionResult> GetUsersWithPassword()
         {
-            Id = user.Id,
-            Name = user.Name,
-            FighterHighScore = user.FighterHighScore,
-            MemoryHighScore = user.MemoryHighScore,
-            SnakeHighScore = user.SnakeHighScore
-        };
+            try
+            {
+                var users = await _context.Users
+                    .Select(u => new UserGetDto_allData
+                    {
+                        Id = u.Id,
+                        Name = u.Name,
+                        Password = u.Password,
+                        FighterHighScore = u.FighterHighScore,
+                        MemoryHighScore = u.MemoryHighScore,
+                        SnakeHighScore = u.SnakeHighScore
+                    })
+                    .ToListAsync();
 
-        // 201 Created + Location header: api/Users/{id}
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, resultDto);
-    }
+                return StatusCode(200, new { message = "Sikeres lekérdezés (debug)", result = users });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
 
+        // GET: api/Users/5  -> egy user ID alapján (jelszó nélkül)
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetUser(int id)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
 
-    // POST: api/Users/{id}/fighter-score
-    [HttpPost("{id}/fighter-score")]
-    public async Task<IActionResult> UpdateFighterScore(int id, FighterScoreUpdateDto dto)
-    {
-        var user = await _context.Users.FindAsync(id);
+                if (user != null)
+                {
+                    var dto = new UserGetByIdDto
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        FighterHighScore = user.FighterHighScore,
+                        MemoryHighScore = user.MemoryHighScore,
+                        SnakeHighScore = user.SnakeHighScore
+                    };
 
-        if (user == null)
-            return NotFound();
+                    return StatusCode(200, new { message = "Sikeres lekérdezés", result = dto });
+                }
 
-        user.FighterHighScore = dto.FighterHighScore;
+                return StatusCode(404, new { message = "Nincs ilyen ID", result = "" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
 
-        await _context.SaveChangesAsync();
-        return NoContent();
-    }
+        // GET: api/Users/5/debug  -> egy user ID alapján, JELSZÓVAL (csak teszt!)
+        [HttpGet("{id}/debug")]
+        public async Task<ActionResult> GetUserWithPassword(int id)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
 
+                if (user != null)
+                {
+                    var dto = new UserGetByIdDto_allData
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        Password = user.Password,
+                        FighterHighScore = user.FighterHighScore,
+                        MemoryHighScore = user.MemoryHighScore,
+                        SnakeHighScore = user.SnakeHighScore
+                    };
 
-    // POST: api/Users/{id}/memory-score
-    [HttpPost("{id}/memory-score")]
-    public async Task<IActionResult> UpdateMemoryScore(int id, MemoryScoreUpdateDto dto)
-    {
-        var user = await _context.Users.FindAsync(id);
+                    return StatusCode(200, new { message = "Sikeres lekérdezés (debug)", result = dto });
+                }
 
-        if (user == null)
-            return NotFound();
+                return StatusCode(404, new { message = "Nincs ilyen ID", result = "" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
 
-        user.MemoryHighScore = dto.MemoryHighScore;
+        // POST: api/Users  -> új user felvitele, NÉV EGYEDISÉG ELLENŐRZÉSSEL (TESZT, password visszaadva)
+        [HttpPost]
+        public async Task<ActionResult> CreateUser(UserCreateDto dto)
+        {
+            try
+            {
+                var nameExists = await _context.Users.AnyAsync(u => u.Name == dto.Name);
+                if (nameExists)
+                {
+                    return StatusCode(409, new { message = "Már létezik ilyen nevű felhasználó.", result = "" });
+                }
 
-        await _context.SaveChangesAsync();
-        return NoContent();
-    }
+                var user = new User
+                {
+                    Name = dto.Name,
+                    Password = dto.Password, // TESZT: később hash!
+                    FighterHighScore = dto.FighterHighScore,
+                    MemoryHighScore = dto.MemoryHighScore,
+                    SnakeHighScore = dto.SnakeHighScore
+                };
 
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
 
+                var resultDto = new UserGetByIdDto_allData
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Password = user.Password,
+                    FighterHighScore = user.FighterHighScore,
+                    MemoryHighScore = user.MemoryHighScore,
+                    SnakeHighScore = user.SnakeHighScore
+                };
 
-    // POST: api/Users/{id}/snake-score
-    [HttpPost("{id}/snake-score")]
-    public async Task<IActionResult> UpdateSnakeScore(int id, SnakeScoreUpdateDto dto)
-    {
-        var user = await _context.Users.FindAsync(id);
+                return StatusCode(201, new { message = "Sikeres hozzáadás", result = resultDto });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
 
-        if (user == null)
-            return NotFound();
+        // POST: api/Users/register  -> csak Name + Password, minden score 0
+        [HttpPost("register")]
+        public async Task<ActionResult> Register(UserRegisterDto dto)
+        {
+            try
+            {
+                var exists = await _context.Users.AnyAsync(u => u.Name == dto.Name);
+                if (exists)
+                {
+                    return StatusCode(409, new { message = "Ez a név már foglalt.", result = "" });
+                }
 
-        user.SnakeHighScore = dto.SnakeHighScore;
+                var user = new User
+                {
+                    Name = dto.Name,
+                    Password = dto.Password, // TESZT: később hash!
+                    FighterHighScore = 0,
+                    MemoryHighScore = 0,
+                    SnakeHighScore = 0
+                };
 
-        await _context.SaveChangesAsync();
-        return NoContent();
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+
+                return StatusCode(201, new
+                {
+                    message = "Sikeres regisztráció",
+                    result = new { user.Id, user.Name }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // POST: api/Users/login
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(UserLoginDto dto)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Name == dto.Name);
+
+                if (user == null || user.Password != dto.Password)
+                {
+                    return StatusCode(401, new { message = "Hibás felhasználónév vagy jelszó.", result = "" });
+                }
+
+                var result = new UserLoginResultDto
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    FighterHighScore = user.FighterHighScore,
+                    MemoryHighScore = user.MemoryHighScore,
+                    SnakeHighScore = user.SnakeHighScore
+                };
+
+                return StatusCode(200, new { message = "Sikeres bejelentkezés", result = result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // POST: api/Users/{id}/fighter-score
+        [HttpPost("{id}/fighter-score")]
+        public async Task<ActionResult> UpdateFighterScore(int id, FighterScoreUpdateDto dto)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user != null)
+                {
+                    user.FighterHighScore = dto.FighterHighScore;
+                    await _context.SaveChangesAsync();
+
+                    return StatusCode(200, new { message = "Fighter pontszám sikeresen frissítve", result = user.FighterHighScore });
+                }
+
+                return StatusCode(404, new { message = "Nincs ilyen ID", result = "" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // POST: api/Users/{id}/memory-score
+        [HttpPost("{id}/memory-score")]
+        public async Task<ActionResult> UpdateMemoryScore(int id, MemoryScoreUpdateDto dto)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user != null)
+                {
+                    user.MemoryHighScore = dto.MemoryHighScore;
+                    await _context.SaveChangesAsync();
+
+                    return StatusCode(200, new { message = "Memory pontszám sikeresen frissítve", result = user.MemoryHighScore });
+                }
+
+                return StatusCode(404, new { message = "Nincs ilyen ID", result = "" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // POST: api/Users/{id}/snake-score
+        [HttpPost("{id}/snake-score")]
+        public async Task<ActionResult> UpdateSnakeScore(int id, SnakeScoreUpdateDto dto)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user != null)
+                {
+                    user.SnakeHighScore = dto.SnakeHighScore;
+                    await _context.SaveChangesAsync();
+
+                    return StatusCode(200, new { message = "Snake pontszám sikeresen frissítve", result = user.SnakeHighScore });
+                }
+
+                return StatusCode(404, new { message = "Nincs ilyen ID", result = "" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
     }
 }

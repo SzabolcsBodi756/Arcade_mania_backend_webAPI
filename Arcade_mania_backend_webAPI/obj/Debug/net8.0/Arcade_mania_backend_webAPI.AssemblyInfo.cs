@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Arcade_mania_backend_webAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+32bcb6f2381681bab20de584d8e541e44a87c6f1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4a64cdce2decef79b146c84e53296188852584f5")]
 [assembly: System.Reflection.AssemblyProductAttribute("Arcade_mania_backend_webAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Arcade_mania_backend_webAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
