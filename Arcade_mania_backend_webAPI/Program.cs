@@ -14,6 +14,21 @@ namespace Arcade_mania_backend_webAPI
             builder.Services.AddDbContext<GameScoresDbContext>(options =>
                 options.UseMySQL(connectionString!));
 
+            // ✅ CORS beállítás React frontendhez
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("ReactCorsPolicy", policy =>
+                {
+                    policy
+                        .WithOrigins(
+                            "http://localhost:5173",
+                            "http://localhost:3000"
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -29,6 +44,9 @@ namespace Arcade_mania_backend_webAPI
             }
 
             app.UseHttpsRedirection();
+
+            // ✅ CORS MUST be here
+            app.UseCors("ReactCorsPolicy");
 
             app.UseAuthorization();
 

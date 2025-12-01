@@ -7,17 +7,7 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "Arcade_mania_backend_webAPI.Models.Dtos.UserGetDto",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Arcade_mania_backend_webAPI.Controllers.UsersController",
@@ -33,17 +23,7 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "Arcade_mania_backend_webAPI.Models.Dtos.UserGetByIdDto_allData",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Arcade_mania_backend_webAPI.Controllers.UsersController",
@@ -55,21 +35,11 @@
     "Parameters": [
       {
         "Name": "id",
-        "Type": "System.UInt32",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "Arcade_mania_backend_webAPI.Models.Dtos.UserGetByIdDto",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Arcade_mania_backend_webAPI.Controllers.UsersController",
@@ -81,21 +51,11 @@
     "Parameters": [
       {
         "Name": "id",
-        "Type": "System.UInt32",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "Arcade_mania_backend_webAPI.Models.Dtos.UserGetByIdDto_allData",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Arcade_mania_backend_webAPI.Controllers.UsersController",
@@ -168,17 +128,7 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "Arcade_mania_backend_webAPI.Models.Dtos.UserGetDto_allData",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Arcade_mania_backend_webAPI.Controllers.UsersController",
@@ -194,17 +144,7 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "Arcade_mania_backend_webAPI.Models.Dtos.UserLoginResultDto",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Arcade_mania_backend_webAPI.Controllers.UsersController",

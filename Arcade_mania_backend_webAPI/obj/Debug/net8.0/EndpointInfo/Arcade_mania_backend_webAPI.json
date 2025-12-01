@@ -12,24 +12,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetDto"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -58,24 +41,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto_allData"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto_allData"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto_allData"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -87,24 +53,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetDto_allData"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetDto_allData"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetDto_allData"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -127,24 +76,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -167,24 +99,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto_allData"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto_allData"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGetByIdDto_allData"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -246,24 +161,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserLoginResultDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserLoginResultDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserLoginResultDto"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -453,118 +351,6 @@
         },
         "additionalProperties": false
       },
-      "UserGetByIdDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "fighterHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "memoryHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snakeHighScore": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserGetByIdDto_allData": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "type": "string",
-            "nullable": true
-          },
-          "fighterHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "memoryHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snakeHighScore": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserGetDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "fighterHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "memoryHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snakeHighScore": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserGetDto_allData": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "type": "string",
-            "nullable": true
-          },
-          "fighterHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "memoryHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snakeHighScore": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
       "UserLoginDto": {
         "type": "object",
         "properties": {
@@ -575,32 +361,6 @@
           "password": {
             "type": "string",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserLoginResultDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "fighterHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "memoryHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snakeHighScore": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
