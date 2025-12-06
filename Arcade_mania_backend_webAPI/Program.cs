@@ -1,5 +1,6 @@
 ﻿using Arcade_mania_backend_webAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using MySql.EntityFrameworkCore.Extensions;
 
 namespace Arcade_mania_backend_webAPI
 {
@@ -11,10 +12,11 @@ namespace Arcade_mania_backend_webAPI
 
             // DbContext regisztrálása DI-be
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<GameScoresDbContext>(options =>
-                options.UseMySQL(connectionString!));
 
-            // ✅ CORS beállítás React frontendhez
+            builder.Services.AddDbContext<ArcadeManiaDatasContext>(options =>
+                options.UseMySQL(connectionString!));   // ⬅️ NINCS MySqlServerVersion, csak UseMySQL
+
+            // CORS beállítás React frontendhez
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("ReactCorsPolicy", policy =>
@@ -29,14 +31,12 @@ namespace Arcade_mania_backend_webAPI
                 });
             });
 
-            // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -45,7 +45,6 @@ namespace Arcade_mania_backend_webAPI
 
             app.UseHttpsRedirection();
 
-            // ✅ CORS MUST be here
             app.UseCors("ReactCorsPolicy");
 
             app.UseAuthorization();

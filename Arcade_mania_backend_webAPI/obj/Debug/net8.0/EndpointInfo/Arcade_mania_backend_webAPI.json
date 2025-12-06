@@ -5,105 +5,6 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/Users": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserCreateDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserCreateDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserCreateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Users/debug": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Users/{id}": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Users/{id}/debug": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/Users/register": {
       "post": {
         "tags": [
@@ -166,8 +67,8 @@
         }
       }
     },
-    "/api/Users/{id}/fighter-score": {
-      "post": {
+    "/api/Users/{id}/scores": {
+      "get": {
         "tags": [
           "Users"
         ],
@@ -177,38 +78,17 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FighterScoreUpdateDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FighterScoreUpdateDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FighterScoreUpdateDto"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "OK"
           }
         }
-      }
-    },
-    "/api/Users/{id}/memory-score": {
+      },
       "post": {
         "tags": [
           "Users"
@@ -219,8 +99,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -228,59 +108,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MemoryScoreUpdateDto"
+                "$ref": "#/components/schemas/UpdateScoreDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/MemoryScoreUpdateDto"
+                "$ref": "#/components/schemas/UpdateScoreDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/MemoryScoreUpdateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Users/{id}/snake-score": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SnakeScoreUpdateDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SnakeScoreUpdateDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/SnakeScoreUpdateDto"
+                "$ref": "#/components/schemas/UpdateScoreDto"
               }
             }
           }
@@ -295,56 +133,14 @@
   },
   "components": {
     "schemas": {
-      "FighterScoreUpdateDto": {
+      "UpdateScoreDto": {
         "type": "object",
         "properties": {
-          "fighterHighScore": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "MemoryScoreUpdateDto": {
-        "type": "object",
-        "properties": {
-          "memoryHighScore": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "SnakeScoreUpdateDto": {
-        "type": "object",
-        "properties": {
-          "snakeHighScore": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserCreateDto": {
-        "type": "object",
-        "properties": {
-          "name": {
+          "gameId": {
             "type": "string",
-            "nullable": true
+            "format": "uuid"
           },
-          "password": {
-            "type": "string",
-            "nullable": true
-          },
-          "fighterHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "memoryHighScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snakeHighScore": {
+          "score": {
             "type": "integer",
             "format": "int32"
           }
