@@ -4,6 +4,8 @@ using Arcade_mania_backend_webAPI.Models.Dtos.Users;
 using Arcade_mania_backend_webAPI.Models.Dtos.Scores;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using NETCore.Encrypt;
 
 namespace Arcade_mania_backend_webAPI.Controllers
 {
@@ -12,10 +14,13 @@ namespace Arcade_mania_backend_webAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ArcadeManiaDatasContext _context;
+        private readonly string _passwordKey;   // ⬅️ kulcs config-ból
 
-        public UsersController(ArcadeManiaDatasContext context)
+        public UsersController(ArcadeManiaDatasContext context, IConfiguration config)
         {
             _context = context;
+            _passwordKey = config["Crypto:PasswordKey"]
+                ?? throw new InvalidOperationException("Crypto:PasswordKey is not configured.");
         }
 
         // POST: api/users/register
@@ -40,7 +45,8 @@ namespace Arcade_mania_backend_webAPI.Controllers
                 {
                     Id = Guid.NewGuid(),
                     UserName = dto.Name,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+                    // jelszó titkosítása kétirányú AES-sel, kulcs configból
+                    PasswordHash = EncryptProvider.AESEncrypt(dto.Password, _passwordKey)
                 };
 
                 await _context.Users.AddAsync(user);
@@ -84,8 +90,23 @@ namespace Arcade_mania_backend_webAPI.Controllers
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.UserName == dto.Name);
 
-                if (user == null ||
-                    !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                if (user == null)
+                {
+                    return StatusCode(401, new { message = "Hibás felhasználónév vagy jelszó.", result = "" });
+                }
+
+                // jelszó visszafejtése az adatbázisból
+                string storedPlainPassword;
+                try
+                {
+                    storedPlainPassword = EncryptProvider.AESDecrypt(user.PasswordHash, _passwordKey);
+                }
+                catch
+                {
+                    return StatusCode(401, new { message = "Hibás felhasználónév vagy jelszó.", result = "" });
+                }
+
+                if (storedPlainPassword != dto.Password)
                 {
                     return StatusCode(401, new { message = "Hibás felhasználónév vagy jelszó.", result = "" });
                 }
@@ -118,7 +139,7 @@ namespace Arcade_mania_backend_webAPI.Controllers
             }
         }
 
-        // GET: api/users/{id}/scores
+        // GET: api/users/{id}/scores  -> user saját score-jai (user nézet)
         [HttpGet("{id:guid}/scores")]
         public async Task<ActionResult> GetUserScores(Guid id)
         {
@@ -151,7 +172,7 @@ namespace Arcade_mania_backend_webAPI.Controllers
             }
         }
 
-        // POST: api/users/{id}/scores
+        // POST: api/users/{id}/scores  -> user score frissítés (user nézet)
         [HttpPost("{id:guid}/scores")]
         public async Task<ActionResult> UpdateScore(Guid id, UpdateScoreDto dto)
         {
@@ -202,6 +223,306 @@ namespace Arcade_mania_backend_webAPI.Controllers
                         highScore = entry.HighScore
                     }
                 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // --------------------------
+        //  ÚJ VÉGPONTOK – USER / ADMIN
+        // --------------------------
+
+        // GET: api/users/public  -> összes user (NINCS ID, NINCS jelszó)
+        [HttpGet("public")]
+        public async Task<ActionResult> GetAllUsersPublic()
+        {
+            try
+            {
+                var users = await _context.Users.ToListAsync();
+
+                var allScores = await _context.UserHighScores
+                    .Join(_context.Games,
+                          s => s.GameId,
+                          g => g.Id,
+                          (s, g) => new
+                          {
+                              s.UserId,
+                              GameId = g.Id,
+                              GameName = g.Name,
+                              HighScore = (int)s.HighScore
+                          })
+                    .ToListAsync();
+
+                var result = users.Select(u => new UserDataPublicDto
+                {
+                    Name = u.UserName,
+                    Scores = allScores
+                        .Where(x => x.UserId == u.Id)
+                        .Select(x => new GameScoreDto
+                        {
+                            GameId = x.GameId,
+                            GameName = x.GameName,
+                            HighScore = x.HighScore
+                        })
+                        .ToList()
+                }).ToList();
+
+                return StatusCode(200, new { message = "Sikeres lekérdezés (public)", result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // GET: api/users/public/{id}  -> egy user (NINCS ID a válaszban, NINCS jelszó)
+        [HttpGet("public/{id:guid}")]
+        public async Task<ActionResult> GetUserPublicById(Guid id)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return StatusCode(404, new { message = "Nincs ilyen felhasználó.", result = "" });
+                }
+
+                var scores = await _context.UserHighScores
+                    .Where(s => s.UserId == id)
+                    .Join(_context.Games,
+                          s => s.GameId,
+                          g => g.Id,
+                          (s, g) => new GameScoreDto
+                          {
+                              GameId = g.Id,
+                              GameName = g.Name,
+                              HighScore = (int)s.HighScore
+                          })
+                    .ToListAsync();
+
+                var result = new UserDataPublicDto
+                {
+                    Name = user.UserName,
+                    Scores = scores
+                };
+
+                return StatusCode(200, new { message = "Sikeres lekérdezés (public, ID alapján)", result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // GET: api/users/admin  -> összes user (ID + PLAIN jelszó + score-ok)
+        [HttpGet("admin")]
+        public async Task<ActionResult> GetAllUsersAdmin()
+        {
+            try
+            {
+                var users = await _context.Users.ToListAsync();
+
+                var allScores = await _context.UserHighScores
+                    .Join(_context.Games,
+                          s => s.GameId,
+                          g => g.Id,
+                          (s, g) => new
+                          {
+                              s.UserId,
+                              GameId = g.Id,
+                              GameName = g.Name,
+                              HighScore = (int)s.HighScore
+                          })
+                    .ToListAsync();
+
+                var result = users.Select(u => new UserDataAdminDto
+                {
+                    Id = u.Id,
+                    Name = u.UserName,
+                    Password = EncryptProvider.AESDecrypt(u.PasswordHash, _passwordKey),
+                    Scores = allScores
+                        .Where(x => x.UserId == u.Id)
+                        .Select(x => new GameScoreDto
+                        {
+                            GameId = x.GameId,
+                            GameName = x.GameName,
+                            HighScore = x.HighScore
+                        })
+                        .ToList()
+                }).ToList();
+
+                return StatusCode(200, new { message = "Sikeres lekérdezés (admin)", result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // GET: api/users/admin/{id}  -> egy user (ID + PLAIN jelszó + score-ok)
+        [HttpGet("admin/{id:guid}")]
+        public async Task<ActionResult> GetUserAdminById(Guid id)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return StatusCode(404, new { message = "Nincs ilyen felhasználó.", result = "" });
+                }
+
+                var scores = await _context.UserHighScores
+                    .Where(s => s.UserId == id)
+                    .Join(_context.Games,
+                          s => s.GameId,
+                          g => g.Id,
+                          (s, g) => new GameScoreDto
+                          {
+                              GameId = g.Id,
+                              GameName = g.Name,
+                              HighScore = (int)s.HighScore
+                          })
+                    .ToListAsync();
+
+                var result = new UserDataAdminDto
+                {
+                    Id = user.Id,
+                    Name = user.UserName,
+                    Password = EncryptProvider.AESDecrypt(user.PasswordHash, _passwordKey),
+                    Scores = scores
+                };
+
+                return StatusCode(200, new { message = "Sikeres lekérdezés (admin, ID alapján)", result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // PUT: api/users/admin/{id}  -> név/jelszó + score-ok módosítása (ADMIN)
+        [HttpPut("admin/{id:guid}")]
+        public async Task<ActionResult> UpdateUserAdmin(Guid id, UserUpdateAdminDto dto)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return StatusCode(404, new { message = "Nincs ilyen felhasználó.", result = "" });
+                }
+
+                // Név módosítás
+                if (!string.IsNullOrWhiteSpace(dto.Name))
+                {
+                    var newName = dto.Name.Trim();
+
+                    if (newName != user.UserName)
+                    {
+                        bool nameExists = await _context.Users
+                            .AnyAsync(u => u.UserName == newName && u.Id != id);
+
+                        if (nameExists)
+                        {
+                            return StatusCode(409, new { message = "Ez a felhasználónév már foglalt.", result = "" });
+                        }
+
+                        user.UserName = newName;
+                    }
+                }
+
+                // Jelszó módosítás (encrypt)
+                if (!string.IsNullOrWhiteSpace(dto.Password))
+                {
+                    var newPassword = dto.Password.Trim();
+                    user.PasswordHash = EncryptProvider.AESEncrypt(newPassword, _passwordKey);
+                }
+
+                // SCORE-OK MÓDOSÍTÁSA / TÖRLÉSE – EGY PUT-BAN TÖBBET IS
+                if (dto.Scores != null)
+                {
+                    // meglévő score-ok adott userhez
+                    var existingScores = await _context.UserHighScores
+                        .Where(s => s.UserId == id)
+                        .ToListAsync();
+
+                    var incomingGameIds = dto.Scores
+                        .Select(s => s.GameId)
+                        .ToHashSet();
+
+                    // 1) törlendők: ami a DB-ben van, de NINCS a bejövő listában
+                    var toDelete = existingScores
+                        .Where(es => !incomingGameIds.Contains(es.GameId))
+                        .ToList();
+
+                    if (toDelete.Count > 0)
+                    {
+                        _context.UserHighScores.RemoveRange(toDelete);
+                    }
+
+                    // 2) upsert: ami jön a listában → vagy létrehoz, vagy frissít
+                    foreach (var scoreDto in dto.Scores)
+                    {
+                        var existing = existingScores
+                            .FirstOrDefault(es => es.GameId == scoreDto.GameId);
+
+                        if (existing == null)
+                        {
+                            var newEntry = new UserHighScore
+                            {
+                                UserId = id,
+                                GameId = scoreDto.GameId,
+                                HighScore = (uint)scoreDto.HighScore
+                            };
+                            await _context.UserHighScores.AddAsync(newEntry);
+                        }
+                        else
+                        {
+                            existing.HighScore = (uint)scoreDto.HighScore;
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return StatusCode(200, new { message = "Felhasználó és pontszámok sikeresen módosítva (admin)", result = "" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+
+
+        // DELETE: api/users/admin/{id}  -> user + score-ok törlése (ADMIN)
+        [HttpDelete("admin/{id:guid}")]
+        public async Task<ActionResult> DeleteUserAdmin(Guid id)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return StatusCode(404, new { message = "Nincs ilyen felhasználó.", result = "" });
+                }
+
+                var scores = await _context.UserHighScores
+                    .Where(s => s.UserId == id)
+                    .ToListAsync();
+
+                if (scores.Count > 0)
+                {
+                    _context.UserHighScores.RemoveRange(scores);
+                }
+
+                _context.Users.Remove(user);
+
+                await _context.SaveChangesAsync();
+
+                return StatusCode(200, new { message = "Felhasználó és pontszámok sikeresen törölve (admin)", result = "" });
             }
             catch (Exception ex)
             {

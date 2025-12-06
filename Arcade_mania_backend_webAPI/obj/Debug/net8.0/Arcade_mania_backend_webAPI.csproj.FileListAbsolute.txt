@@ -128,4 +128,5 @@ C:\Users\szabo\source\repos\Arcade_mania_backend_webAPI\Arcade_mania_backend_web
 C:\Users\szabo\source\repos\Arcade_mania_backend_webAPI\Arcade_mania_backend_webAPI\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\szabo\source\repos\Arcade_mania_backend_webAPI\Arcade_mania_backend_webAPI\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\szabo\source\repos\Arcade_mania_backend_webAPI\Arcade_mania_backend_webAPI\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
-C:\Users\szabo\source\repos\Arcade_mania_backend_webAPI\Arcade_mania_backend_webAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\Users\szabo\source\repos\Arcade_mania_backend_webAPI\Arcade_mania_backend_webAPI\bin\Debug\net8.0\NETCore.Encrypt.dll
+C:\Users\szabo\source\repos\Arcade_mania_backend_webAPI\Arcade_mania_backend_webAPI\bin\Debug\net8.0\Newtonsoft.Json.dll

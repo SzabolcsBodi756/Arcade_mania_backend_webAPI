@@ -1,10 +1,9 @@
 {
   "version": 2,
-  "dgSpecHash": "kVIE5OO9lkE=",
+  "dgSpecHash": "znyMTOUSq1M=",
   "success": true,
   "projectFilePath": "C:\\Users\\szabo\\source\\repos\\Arcade_mania_backend_webAPI\\Arcade_mania_backend_webAPI\\Arcade_mania_backend_webAPI.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\szabo\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\szabo\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
     "C:\\Users\\szabo\\.nuget\\packages\\google.protobuf\\3.32.0\\google.protobuf.3.32.0.nupkg.sha512",
     "C:\\Users\\szabo\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
@@ -38,6 +37,8 @@
     "C:\\Users\\szabo\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\szabo\\.nuget\\packages\\mysql.data\\9.5.0\\mysql.data.9.5.0.nupkg.sha512",
     "C:\\Users\\szabo\\.nuget\\packages\\mysql.entityframeworkcore\\8.0.20\\mysql.entityframeworkcore.8.0.20.nupkg.sha512",
+    "C:\\Users\\szabo\\.nuget\\packages\\netcore.encrypt\\2.1.1\\netcore.encrypt.2.1.1.nupkg.sha512",
+    "C:\\Users\\szabo\\.nuget\\packages\\newtonsoft.json\\12.0.1\\newtonsoft.json.12.0.1.nupkg.sha512",
     "C:\\Users\\szabo\\.nuget\\packages\\swashbuckle.aspnetcore\\6.6.2\\swashbuckle.aspnetcore.6.6.2.nupkg.sha512",
     "C:\\Users\\szabo\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.6.2\\swashbuckle.aspnetcore.swagger.6.6.2.nupkg.sha512",
     "C:\\Users\\szabo\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.6.2\\swashbuckle.aspnetcore.swaggergen.6.6.2.nupkg.sha512",
