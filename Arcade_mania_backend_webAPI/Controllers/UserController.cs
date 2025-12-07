@@ -188,6 +188,43 @@ namespace Arcade_mania_backend_webAPI.Controllers
             }
         }
 
+        [HttpGet("public/{id:guid}")] 
+        public async Task<ActionResult> GetUserPublicById(Guid id) 
+        { 
+            try 
+            { 
+                var user = await _context.Users.FindAsync(id); 
+
+                if (user == null) 
+                { 
+                    return StatusCode(404, new { message = "Nincs ilyen felhasználó.", result = "" }); } 
+                
+                    var scores = await _context.UserHighScores
+                        .Where(s => s.UserId == id)
+                        .Join(_context.Games, 
+                            s => s.GameId, 
+                            g => g.Id, 
+                            (s, g) => new GameScoreDto 
+                            { 
+                                GameId = g.Id, 
+                                GameName = g.Name, 
+                                HighScore = (int)s.HighScore })
+                        .ToListAsync();
+                
+                    var result = new UserDataPublicDto 
+                        {   Name = user.UserName, 
+                            Scores = scores 
+                        }; 
+                
+                    return StatusCode(200, new { message = "Sikeres lekérdezés (public, ID alapján)", result }); 
+            } 
+            catch (Exception ex) 
+            { 
+
+                return StatusCode(400, new { message = ex.Message, result = "" }); } 
+
+            }
+
         // GET: api/users/admin  -> összes user (ID + PLAIN jelszó + score-ok)
         [HttpGet("admin")]
         public async Task<ActionResult> GetAllUsersAdmin()
