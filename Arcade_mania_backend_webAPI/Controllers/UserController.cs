@@ -188,45 +188,6 @@ namespace Arcade_mania_backend_webAPI.Controllers
             }
         }
 
-        // GET: api/users/public/{id}  -> egy user (NINCS ID a válaszban, NINCS jelszó)
-        [HttpGet("public/{id:guid}")]
-        public async Task<ActionResult> GetUserPublicById(Guid id)
-        {
-            try
-            {
-                var user = await _context.Users.FindAsync(id);
-                if (user == null)
-                {
-                    return StatusCode(404, new { message = "Nincs ilyen felhasználó.", result = "" });
-                }
-
-                var scores = await _context.UserHighScores
-                    .Where(s => s.UserId == id)
-                    .Join(_context.Games,
-                          s => s.GameId,
-                          g => g.Id,
-                          (s, g) => new GameScoreDto
-                          {
-                              GameId = g.Id,
-                              GameName = g.Name,
-                              HighScore = (int)s.HighScore
-                          })
-                    .ToListAsync();
-
-                var result = new UserDataPublicDto
-                {
-                    Name = user.UserName,
-                    Scores = scores
-                };
-
-                return StatusCode(200, new { message = "Sikeres lekérdezés (public, ID alapján)", result });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(400, new { message = ex.Message, result = "" });
-            }
-        }
-
         // GET: api/users/admin  -> összes user (ID + PLAIN jelszó + score-ok)
         [HttpGet("admin")]
         public async Task<ActionResult> GetAllUsersAdmin()
@@ -306,6 +267,81 @@ namespace Arcade_mania_backend_webAPI.Controllers
                 };
 
                 return StatusCode(200, new { message = "Sikeres lekérdezés (admin, ID alapján)", result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { message = ex.Message, result = "" });
+            }
+        }
+
+        // POST: api/users/admin  -> új user felvitele (ADMIN), minden score = 0
+        [HttpPost("admin")]
+        public async Task<ActionResult> CreateUserAdmin(UserCreateAdminDto dto)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(dto.Name) ||
+                    string.IsNullOrWhiteSpace(dto.Password))
+                {
+                    return StatusCode(400, new { message = "Név és jelszó megadása kötelező.", result = "" });
+                }
+
+                var cleanName = dto.Name.Trim();
+
+                // név egyediség ellenőrzés
+                bool exists = await _context.Users
+                    .AnyAsync(u => u.UserName == cleanName);
+
+                if (exists)
+                {
+                    return StatusCode(409, new { message = "Ez a név már foglalt.", result = "" });
+                }
+
+                // új user létrehozása, jelszó AES titkosítással
+                var user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = cleanName,
+                    PasswordHash = EncryptProvider.AESEncrypt(dto.Password.Trim(), _passwordKey)
+                };
+
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+
+                // minden létező játékhoz 0-s score
+                var games = await _context.Games.ToListAsync();
+
+                foreach (var game in games)
+                {
+                    _context.UserHighScores.Add(new UserHighScore
+                    {
+                        UserId = user.Id,
+                        GameId = game.Id,
+                        HighScore = 0u
+                    });
+                }
+
+                if (games.Count > 0)
+                {
+                    await _context.SaveChangesAsync();
+                }
+
+                // visszaadjuk admin szempontból az új user adatait
+                var result = new UserDataAdminDto
+                {
+                    Id = user.Id,
+                    Name = user.UserName,
+                    // adminnak olvasható jelszó (amit most vittél fel)
+                    Password = dto.Password.Trim(),
+                    Scores = games.Select(g => new GameScoreDto
+                    {
+                        GameId = g.Id,
+                        GameName = g.Name,
+                        HighScore = 0
+                    }).ToList()
+                };
+
+                return StatusCode(201, new { message = "Új felhasználó sikeresen létrehozva (admin).", result });
             }
             catch (Exception ex)
             {

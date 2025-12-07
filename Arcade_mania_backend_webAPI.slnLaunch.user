@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Arcade_mania_backend_webAPI\\Arcade_mania_backend_webAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Arcade_mania_backend_WPF\\Arcade_mania_backend_WPF.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
